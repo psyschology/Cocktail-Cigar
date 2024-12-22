@@ -1,0 +1,526 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Ultimate Cocktail & Cigar Experience</title>
+    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700&family=Roboto:wght@300;400;700&display=swap');
+
+        body {
+            font-family: 'Roboto', sans-serif;
+            background-color: #1a1a1a;
+            color: #e0e0e0;
+        }
+
+        h1, h2, h3 {
+            font-family: 'Playfair Display', serif;
+        }
+
+        .sidebar {
+            background-color: #2c2c2c;
+            transition: all 0.3s;
+            z-index: 1000;
+        }
+
+        .content {
+            transition: margin-left 0.3s;
+        }
+
+        .section {
+            display: none;
+            opacity: 0;
+            transition: opacity 0.5s ease-in-out;
+        }
+
+        .section.active {
+            display: block;
+            opacity: 1;
+        }
+
+        .card {
+            background-color: #2c2c2c;
+            border-radius: 8px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            transition: transform 0.3s ease-in-out, box-shadow 0.3s ease-in-out;
+        }
+
+        .card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 6px 12px rgba(0, 0, 0, 0.2);
+        }
+
+        .btn {
+            transition: all 0.3s;
+        }
+
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.2);
+        }
+
+        #smokeCanvas {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: -1;
+        }
+
+        .quote-card {
+            background-color: rgba(44, 44, 44, 0.8);
+            backdrop-filter: blur(10px);
+        }
+
+        .gift-card {
+            background: linear-gradient(135deg, #4a0e0e, #8b4513);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .gift-card::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: radial-gradient(circle, rgba(255,255,255,0.1) 0%, rgba(255,255,255,0) 70%);
+            transform: rotate(30deg);
+        }
+
+        .whiskey-glass {
+            width: 100px;
+            height: 120px;
+            background-color: rgba(255, 255, 255, 0.2);
+            border-radius: 0 0 10px 10px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .whiskey {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            width: 100%;
+            height: 0;
+            background-color: #ffbe76;
+            transition: height 2s ease-in-out;
+        }
+
+        .stream {
+            position: absolute;
+            top: -100px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 10px;
+            height: 100px;
+            background-color: #ffbe76;
+            display: none;
+        }
+
+        @keyframes float {
+            0% { transform: translateY(0px); }
+            50% { transform: translateY(-10px); }
+            100% { transform: translateY(0px); }
+        }
+
+        .floating {
+            animation: float 3s ease-in-out infinite;
+        }
+
+        .menu-icon {
+            cursor: pointer;
+            display: none;
+        }
+
+        @media (max-width: 768px) {
+            .menu-icon {
+                display: block;
+            }
+
+            .sidebar {
+                transform: translateX(-100%);
+            }
+
+            .sidebar.active {
+                transform: translateX(0);
+            }
+
+            .content {
+                margin-left: 0 !important;
+            }
+        }
+    </style>
+</head>
+<body class="flex">
+    <canvas id="smokeCanvas"></canvas>
+    <div id="sidebar" class="sidebar w-64 h-screen fixed left-0 top-0 p-4 overflow-y-auto">
+        <h1 class="text-2xl font-bold mb-8 text-center">Cocktail & Cigar</h1>
+        <nav>
+            <ul class="space-y-2">
+                <li><a href="#home" class="block py-2 px-4 hover:bg-gray-700 rounded transition-colors">Home</a></li>
+                <li><a href="#pairing" class="block py-2 px-4 hover:bg-gray-700 rounded transition-colors">Pairing</a></li>
+                <li><a href="#journal" class="block py-2 px-4 hover:bg-gray-700 rounded transition-colors">Journal</a></li>
+                <li><a href="#games" class="block py-2 px-4 hover:bg-gray-700 rounded transition-colors">Games</a></li>
+                <li><a href="#quotes" class="block py-2 px-4 hover:bg-gray-700 rounded transition-colors">Quotes</a></li>
+                <li><a href="#gift" class="block py-2 px-4 hover:bg-gray-700 rounded transition-colors">Gift Card</a></li>
+            </ul>
+        </nav>
+    </div>
+
+    <div id="content" class="content ml-64 p-8 w-full">
+        <div class="menu-icon fixed top-4 left-4 z-50 bg-gray-800 p-2 rounded-full">
+            <i class="fas fa-bars text-white"></i>
+        </div>
+
+        <section id="home" class="section active">
+            <h2 class="text-4xl font-bold mb-8">Welcome to Your Ultimate Cocktail & Cigar Experience</h2>
+            <p class="text-xl mb-8">Explore the perfect pairings, keep a journal, play games, and more!</p>
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+                <div class="card p-6 floating">
+                    <i class="fas fa-glass-whiskey text-4xl mb-4"></i>
+                    <h3 class="text-2xl font-bold mb-2">Expert Pairings</h3>
+                    <p>Discover the perfect cocktail and cigar combinations.</p>
+                </div>
+                <div class="card p-6 floating">
+                    <i class="fas fa-book text-4xl mb-4"></i>
+                    <h3 class="text-2xl font-bold mb-2">Personal Journal</h3>
+                    <p>Keep track of your favorite drinks and cigars.</p>
+                </div>
+                <div class="card p-6 floating">
+                    <i class="fas fa-gamepad text-4xl mb-4"></i>
+                    <h3 class="text-2xl font-bold mb-2">Fun Games</h3>
+                    <p>Test your knowledge with our trivia games.</p>
+                </div>
+            </div>
+        </section>
+
+        <section id="pairing" class="section">
+            <h2 class="text-4xl font-bold mb-8">Cocktail & Cigar Pairing</h2>
+            <div class="card p-6 mb-8">
+                <h3 id="pairingTitle" class="text-2xl font-bold mb-4">Loading...</h3>
+                <p id="pairingDescription" class="mb-4"></p>
+                <button id="randomPairing" class="btn bg-amber-600 hover:bg-amber-700 text-white font-bold py-2 px-4 rounded">
+                    Get Random Pairing
+                </button>
+            </div>
+        </section>
+
+        <section id="journal" class="section">
+            <h2 class="text-4xl font-bold mb-8">Drink & Cigar Journal</h2>
+            <div class="card p-6 mb-8">
+                <h3 class="text-2xl font-bold mb-4">Add New Entry</h3>
+                <form id="journalForm" class="space-y-4">
+                    <input type="text" id="entryName" placeholder="Drink/Cigar Name" required class="w-full p-2 bg-gray-700 rounded">
+                    <input type="number" id="entryRating" placeholder="Rating (1-5)" min="1" max="5" required class="w-full p-2 bg-gray-700 rounded">
+                    <textarea id="entryNotes" placeholder="Notes" required class="w-full p-2 bg-gray-700 rounded"></textarea>
+                    <button type="submit" class="btn bg-green-600 hover:bg-green-700 text-white font-bold py-2 px-4 rounded">
+                        Add Entry
+                    </button>
+                </form>
+            </div>
+            <div id="journalEntries" class="space-y-4"></div>
+        </section>
+
+        <section id="games" class="section">
+            <h2 class="text-4xl font-bold mb-8">Trivia Game</h2>
+            <div class="card p-6">
+                <h3 id="questionText" class="text-2xl font-bold mb-4">Loading...</h3>
+                <div id="answerButtons" class="space-y-2"></div>
+                <p id="scoreText" class="mt-4 text-xl"></p>
+            </div>
+        </section>
+
+        <section id="quotes" class="section">
+            <h2 class="text-4xl font-bold mb-8">Inspirational Quotes</h2>
+            <div id="quoteCard" class="quote-card p-6 rounded-lg shadow-lg mb-4">
+                <p id="quoteText" class="text-xl italic mb-2"></p>
+                <p id="quoteAuthor" class="text-right font-bold"></p>
+            </div>
+            <button id="newQuote" class="btn bg-purple-600 hover:bg-purple-700 text-white font-bold py-2 px-4 rounded">
+                New Quote
+            </button>
+        </section>
+
+        <section id="gift" class="section">
+            <h2 class="text-4xl font-bold mb-8">Digital Gift Card</h2>
+            <div class="gift-card p-6 rounded-lg shadow-lg text-center">
+                <h3 class="text-2xl font-bold mb-4">$50 Gift Card</h3>
+                <p class="mb-4">For the finest cocktails and cigars</p>
+                <div class="whiskey-glass mx-auto mb-4">
+                    <div class="stream"></div>
+                    <div class="whiskey"></div>
+                </div>
+                <button id="claimGift" class="btn bg-yellow-600 hover:bg-yellow-700 text-white font-bold py-2 px-4 rounded">
+                    Claim Your Gift Card
+                </button>
+            </div>
+        </section>
+    </div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/p5.js/1.4.0/p5.min.js"></script>
+    <script>
+        // Navigation
+        const sidebar = document.getElementById('sidebar');
+        const content = document.getElementById('content');
+        const menuIcon = document.querySelector('.menu-icon');
+
+        menuIcon.addEventListener('click', () => {
+            sidebar.classList.toggle('active');
+            content.classList.toggle('ml-0');
+            content.classList.toggle('ml-64');
+        });
+
+        document.querySelectorAll('nav a').forEach(link => {
+            link.addEventListener('click', (e) => {
+                e.preventDefault();
+                const targetId = e.target.getAttribute('href').substring(1);
+                document.querySelectorAll('.section').forEach(section => {
+                    section.classList.remove('active');
+                });
+                document.getElementById(targetId).classList.add('active');
+                if (window.innerWidth <= 768) {
+                    sidebar.classList.remove('active');
+                    content.classList.remove('ml-64');
+                    content.classList.add('ml-0');
+                }
+            });
+        });
+
+        // Pairing Section
+        const pairings = [
+            { drink: 'Whiskey Sour', cigar: 'Montecristo No. 2', description: 'The citrusy notes of the Whiskey Sour complement the medium-bodied Montecristo perfectly.' },
+            { drink: 'Old Fashioned', cigar: 'Cohiba Behike', description: 'The rich, complex flavors of an Old Fashioned pair wonderfully with the full-bodied Cohiba Behike.' },
+            { drink: 'Mojito', cigar: 'Romeo y Julieta Wide Churchills', description: 'The refreshing Mojito balances nicely with the mild to medium-bodied Romeo y Julieta.' },
+            { drink: 'Manhattan', cigar: 'Partagás Serie D No. 4', description: 'The sweet vermouth in a Manhattan complements the full-bodied, spicy Partagás beautifully.' },
+            { drink: 'Negroni', cigar: 'Hoyo de Monterrey Epicure No. 2', description: 'The bitter-sweet Negroni pairs excellently with the medium-bodied, creamy Hoyo de Monterrey.' },
+        ];
+
+        function getRandomPairing() {
+            const randomPairing = pairings[Math.floor(Math.random() * pairings.length)];
+            document.getElementById('pairingTitle').textContent = `${randomPairing.drink} & ${randomPairing.cigar}`;
+            document.getElementById('pairingDescription').textContent = randomPairing.description;
+        }
+
+        document.getElementById('randomPairing').addEventListener('click', getRandomPairing);
+        getRandomPairing(); // Initial pairing
+
+        // Journal Section
+        document.getElementById('journalForm').addEventListener('submit', (e) => {
+            e.preventDefault();
+            const name = document.getElementById('entryName').value;
+            const rating = document.getElementById('entryRating').value;
+            const notes = document.getElementById('entryNotes').value;
+
+            if (name && rating && notes) {
+                const entry = { name, rating, notes, date: new Date().toLocaleString() };
+                let entries = JSON.parse(localStorage.getItem('journalEntries') || '[]');
+                entries.push(entry);
+                localStorage.setItem('journalEntries', JSON.stringify(entries));
+                displayJournalEntries();
+                
+                // Clear form
+                e.target.reset();
+            }
+        });
+
+        function displayJournalEntries() {
+            const entriesContainer = document.getElementById('journalEntries');
+            entriesContainer.innerHTML = '';
+            const entries = JSON.parse(localStorage.getItem('journalEntries') || '[]');
+            entries.reverse().forEach(entry => {
+                const entryElement = document.createElement('div');
+                entryElement.className = 'card p-4 mb-4';
+                entryElement.innerHTML = `
+                    <h4 class="text-xl font-bold mb-2">${entry.name}</h4>
+                    <p class="mb-2">Rating: ${'★'.repeat(entry.rating)}${'☆'.repeat(5 - entry.rating)}</p>
+                    <p class="mb-2">${entry.notes}</p>
+                    <p class="text-sm text-gray-400">${entry.date}</p>
+                `;
+                entriesContainer.appendChild(entryElement);
+            });
+        }
+
+        displayJournalEntries(); // Initial display
+
+        // Games Section
+        const triviaQuestions = [
+            {
+                question: 'What is the main ingredient in a Mojito?',
+                options: ['Vodka', 'Rum', 'Gin', 'Tequila'],
+                correctAnswer: 'Rum',
+            },
+            {
+                question: 'Which country is known for producing Cohiba cigars?',
+                options: ['Dominican Republic', 'Nicaragua', 'Cuba', 'Honduras'],
+                correctAnswer: 'Cuba',
+            },
+            {
+                question: 'What type of glass is traditionally used for an Old Fashioned?',
+                options: ['Martini glass', 'Highball glass', 'Rocks glass', 'Champagne flute'],
+                correctAnswer: 'Rocks glass',
+            },
+            {
+                question: 'Which spirit is the base for a Negroni?',
+                options: ['Vodka', 'Gin', 'Whiskey', 'Tequila'],
+                correctAnswer: 'Gin',
+            },
+            {
+                question: 'What does "VSOP" stand for on a cognac bottle?',
+                options: ['Very Special Old Pale', 'Very Superior Old Pale', 'Very Special Old Product', 'Very Superior Old Product'],
+                correctAnswer: 'Very Superior Old Pale',
+            },
+        ];
+
+        let currentQuestion = 0;
+        let score = 0;
+
+        function displayQuestion() {
+            const question = triviaQuestions[currentQuestion];
+            document.getElementById('questionText').textContent = question.question;
+            const answerButtons = document.getElementById('answerButtons');
+            answerButtons.innerHTML = '';
+            question.options.forEach(option => {
+                const button = document.createElement('button');
+                button.textContent = option;
+                button.className = 'btn bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded w-full';
+                button.addEventListener('click', () => checkAnswer(option));
+                answerButtons.appendChild(button);
+            });
+        }
+
+        function checkAnswer(selectedAnswer) {
+            const question = triviaQuestions[currentQuestion];
+            if (selectedAnswer === question.correctAnswer) {
+                score++;
+            }
+            currentQuestion++;
+            if (currentQuestion < triviaQuestions.length) {
+                displayQuestion();
+            } else {
+                endQuiz();
+            }
+        }
+
+        function endQuiz() {
+            document.getElementById('questionText').textContent = 'Quiz Complete!';
+            document.getElementById('answerButtons').innerHTML = '';
+            document.getElementById('scoreText').textContent = `You scored ${score} out of ${triviaQuestions.length}`;
+            const restartButton = document.createElement('button');
+            restartButton.textContent = 'Restart Quiz';
+            restartButton.className = 'btn bg-green-600 hover:bg-green-700 text-white font-bold py-2 px-4 rounded mt-4';
+            restartButton.addEventListener('click', restartQuiz);
+            document.getElementById('answerButtons').appendChild(restartButton);
+        }
+
+        function restartQuiz() {
+            currentQuestion = 0;
+            score = 0;
+            displayQuestion();
+            document.getElementById('scoreText').textContent = '';
+        }
+
+        displayQuestion(); // Initial question
+
+        // Quotes Section
+        const quotes = [
+            { text: "I drink to make other people more interesting.", author: "Ernest Hemingway" },
+            { text: "Too much of anything is bad, but too much good whiskey is barely enough.", author: "Mark Twain" },
+            { text: "Happiness is a cigar called Hamlet.", author: "Hamlet Cigars" },
+            { text: "Alcohol may be man's worst enemy, but the bible says love your enemy.", author: "Frank Sinatra" },
+            { text: "A good cigar is as great a comfort to a man as a good cry to a woman.", author: "Edward G. Bulwer-Lytton" },
+        ];
+
+        function displayRandomQuote() {
+            const quote = quotes[Math.floor(Math.random() * quotes.length)];
+            document.getElementById('quoteText').textContent = `"${quote.text}"`;
+            document.getElementById('quoteAuthor').textContent = `- ${quote.author}`;
+        }
+
+        document.getElementById('newQuote').addEventListener('click', displayRandomQuote);
+        displayRandomQuote(); // Initial quote
+
+        // Gift Card Section
+        document.getElementById('claimGift').addEventListener('click', () => {
+            const whiskey = document.querySelector('.whiskey');
+            const stream = document.querySelector('.stream');
+            const button = document.getElementById('claimGift');
+
+            // Start pouring animation
+            stream.style.display = 'block';
+            setTimeout(() => {
+                whiskey.style.height = '80%';
+            }, 100);
+
+            // Stop pouring animation
+            setTimeout(() => {
+                stream.style.display = 'none';
+            }, 2000);
+
+            // Change button text
+            button.textContent = 'Gift Card Claimed!';
+            button.disabled = true;
+        });
+
+        // Smoke Animation
+        let particles = [];
+
+        function setup() {
+            let canvas = createCanvas(windowWidth, windowHeight);
+            canvas.parent('smokeCanvas');
+        }
+
+        function draw() {
+            clear();
+            if (random(1) < 0.1) {
+                particles.push(new Particle());
+            }
+
+            for (let i = particles.length - 1; i >= 0; i--) {
+                particles[i].update();
+                particles[i].display();
+                if (particles[i].finished()) {
+                    particles.splice(i, 1);
+                }
+            }
+        }
+
+        class Particle {
+            constructor() {
+                this.x = random(width);
+                this.y = height;
+                this.vx = random(-1, 1);
+                this.vy = random(-5, -1);
+                this.alpha = 255;
+                this.size = random(20, 40);
+            }
+
+            finished() {
+                return this.alpha < 0;
+            }
+
+            update() {
+                this.x += this.vx;
+                this.y += this.vy;
+                this.alpha -= 1;
+                this.size += 0.2;
+            }
+
+            display() {
+                noStroke();
+                fill(200, this.alpha);
+                ellipse(this.x, this.y, this.size);
+            }
+        }
+
+        function windowResized() {
+            resizeCanvas(windowWidth, windowHeight);
+        }
+    </script>
+</body>
+</html>
